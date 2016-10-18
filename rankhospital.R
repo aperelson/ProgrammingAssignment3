@@ -11,67 +11,54 @@ rankhospital <- function(state, outcome, num = "best") {
     if (is.element(outcome, c('heart attack', 'heart failure', 'pneumonia')) == FALSE) {
         stop("invalid condition")
     }
-    
-    
+
     ## Return hospital name in that state with the given rank 30-day death rate
     
     ## Get all the hospitals in the state:
     hospinstate <- outcomeofcare[outcomeofcare$State==state,]
     
     ## Choose which criteria to get the lowest of:
+    ## And convert column to numbers for sorting and suppress warnings:
     if (outcome == 'heart attack') {
-        sortingcolumn <- 11
+        sortingcolumn <- which(colnames(realtopone)=="Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack")
         
-        #Convert column to numbers for sorting and suppress warnings:
         hospinstate[sortingcolumn] = 
             suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
-
-        aggr <- aggregate(Provider.Number ~ Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack, hospinstate, max)
     }
     else if (outcome == 'heart failure') {
-        sortingcolumn <- 17
+        sortingcolumn <- which(colnames(realtopone)=="Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure")
         
-        #Convert column to numbers for sorting and suppress warnings:
         hospinstate[sortingcolumn] = 
             suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
-        
-        aggr <- aggregate(Provider.Number ~ Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure, hospinstate, max)
     }
     else if (outcome == 'pneumonia') {
-        sortingcolumn <- 23
+        sortingcolumn <- which(colnames(realtopone)=="Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia")
         
-        #Convert column to numbers for sorting and suppress warnings:
         hospinstate[sortingcolumn] = 
             suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
-        
-        aggr <- aggregate(Provider.Number ~ Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia, hospinstate, max)
     }
     
-    namecolumn <- grep("Hospital.Name", colnames(hospinstate))
- 
+    namecolumn <- which(colnames(realtopone)=="Hospital.Name")
+
+    ## Order the data frame: 
+    hospinstate <- hospinstate[order(hospinstate[sortingcolumn], hospinstate[namecolumn]),]
     
-       
-    orderedList <- merge(aggr, hospinstate)
-
-
+    ## Extract only the not NA rows:
+    hospinstate <- hospinstate[!is.na(hospinstate[sortingcolumn]),]
+    
+    ## Determine which record to fetch:
     if (num == 'best') {
-        topone <- head(orderedList, 1)        
+        mainone <- head(hospinstate, 1)        
     }
     else if (num == 'worst') {
-        topone <- tail(orderedList, 1)        
+        mainone <- tail(hospinstate, 1)        
     }
-    else if (is.numeric(num)) {
-        topone <- orderedList
+    else if ((is.numeric(num)) & (num >= 1) & (num <= nrow(hospinstate))) {
+        mainone <- hospinstate[num,]
     }
     else {
-        stop("invalid number")
+        return(NA)
     }
         
-        
-    #Order by both the condition and the hospital name:    
-    #topone <- hospinstate[order(hospinstate[sortingcolumn],hospinstate[namecolumn]),]
-    #topone$Hospital.Name[num]
-    
-    topone
-            
+    mainone$Hospital.Name
 }
