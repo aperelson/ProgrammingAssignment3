@@ -21,22 +21,57 @@ rankhospital <- function(state, outcome, num = "best") {
     ## Choose which criteria to get the lowest of:
     if (outcome == 'heart attack') {
         sortingcolumn <- 11
+        
+        #Convert column to numbers for sorting and suppress warnings:
+        hospinstate[sortingcolumn] = 
+            suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
+
+        aggr <- aggregate(Provider.Number ~ Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack, hospinstate, max)
     }
     else if (outcome == 'heart failure') {
         sortingcolumn <- 17
+        
+        #Convert column to numbers for sorting and suppress warnings:
+        hospinstate[sortingcolumn] = 
+            suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
+        
+        aggr <- aggregate(Provider.Number ~ Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure, hospinstate, max)
     }
     else if (outcome == 'pneumonia') {
         sortingcolumn <- 23
+        
+        #Convert column to numbers for sorting and suppress warnings:
+        hospinstate[sortingcolumn] = 
+            suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
+        
+        aggr <- aggregate(Provider.Number ~ Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia, hospinstate, max)
     }
     
     namecolumn <- grep("Hospital.Name", colnames(hospinstate))
+ 
     
-    #Convert column to numbers for sorting and suppress warnings:
-    hospinstate[sortingcolumn] = 
-        suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
-    
+       
+    orderedList <- merge(aggr, hospinstate)
+
+
+    if (num == 'best') {
+        topone <- head(orderedList, 1)        
+    }
+    else if (num == 'worst') {
+        topone <- tail(orderedList, 1)        
+    }
+    else if (is.numeric(num)) {
+        topone <- orderedList
+    }
+    else {
+        stop("invalid number")
+    }
+        
+        
     #Order by both the condition and the hospital name:    
-    topone <- hospinstate[order(hospinstate[sortingcolumn],hospinstate[namecolumn]),]
-    topone$Hospital.Name[num]
+    #topone <- hospinstate[order(hospinstate[sortingcolumn],hospinstate[namecolumn]),]
+    #topone$Hospital.Name[num]
+    
+    topone
             
 }
