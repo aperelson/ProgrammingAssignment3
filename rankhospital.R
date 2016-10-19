@@ -21,22 +21,16 @@ rankhospital <- function(state, outcome, num = "best") {
     ## And convert column to numbers for sorting and suppress warnings:
     if (outcome == 'heart attack') {
         sortingcolumn <- which(colnames(hospinstate)=="Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack")
-        
-        hospinstate[sortingcolumn] = 
-            suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
     }
     else if (outcome == 'heart failure') {
         sortingcolumn <- which(colnames(hospinstate)=="Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure")
-        
-        hospinstate[sortingcolumn] = 
-            suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
     }
     else if (outcome == 'pneumonia') {
         sortingcolumn <- which(colnames(hospinstate)=="Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia")
-        
-        hospinstate[sortingcolumn] = 
-            suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
     }
+    
+    hospinstate[sortingcolumn] = 
+        suppressWarnings(as.numeric(hospinstate[sortingcolumn][hospinstate[sortingcolumn] != 'No']))
     
     namecolumn <- which(colnames(hospinstate)=="Hospital.Name")
 
